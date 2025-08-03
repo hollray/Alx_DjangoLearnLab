@@ -50,12 +50,10 @@ def query_books_by_author(author_name):
     print(f"\n--- Querying all books by '{author_name}' ---")
     try:
         # Get the author first
-        author = Author.objects.get(name=Author)
-        # Use the reverse relationship manager to get all books by this author
-        books = author.book_set.all()
-        # The author has a default reverse relationship name of 'book_set'.
-        # If you defined a 'related_name' in your Book model's ForeignKey,
-        # you would use that name instead (e.g., author.books.all()).
+        author = Author.objects.get(name=author_name)
+        # using the filter method to get all books by this author
+        books = Book.objects.filter(author=author)
+        
 
         if books:
             for book in books:
