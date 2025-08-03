@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class Author (models.Model):
+class Author(models.Model):
      """
     Represents an Author model with name.
     """
@@ -9,21 +9,21 @@ class Author (models.Model):
 
      
 
-class Book (models.Model):
+class Book(models.Model):
       """
     Represents a book with a title, author.
     """
       title = models.CharField(max_length=200)
       author = models.ForeignKey(Author,on_delete=models.CASCADE, related_name='author')
 
-class Library (models.Model):
+class Library(models.Model):
        """
     Represents a library model with name and books.
     """
        name = models.CharField(max_length=200)
        books = models.ManyToManyField(Book, related_name='libraries')
 
-class Librarian (models.Model):
+class Librarian(models.Model):
        """
     Represents a librarian model with a name of the librarian and the library.
     """
