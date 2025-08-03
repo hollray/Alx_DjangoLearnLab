@@ -1,4 +1,8 @@
 from django.shortcuts import render
+from django.shortcuts import redirect
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LogoutView
+from .forms import UserRegistrationForm
 from django.http import HttpResponse
 from django.views.generic import DetailView
 from django.views.generic.detail import DetailView
@@ -46,3 +50,23 @@ class LibraryDetailView(DetailView):
         # We can access the related books using the reverse relationship
         context['books'] = self.object.book_set.all()
         return context
+
+
+def register(request):
+    """
+    A view for user registration.
+    It handles both GET and POST requests.
+    """
+    if request.method == 'POST':
+        # If the request is POST, process the form data
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            # Redirect to the login page after successful registration
+            return redirect('login')
+    else:
+        # If the request is GET, display a blank registration form
+        form = UserRegistrationForm()
+    
+    # Render the 'register.html' template with the form
+    return render(request, 'relationship_app/register.html', {'form': form})
