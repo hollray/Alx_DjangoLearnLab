@@ -7,6 +7,8 @@ class Author (models.Model):
     """
      name = models.CharField(max_length=200)
 
+     
+
 class Book (models.Model):
       """
     Represents a book with a title, author.
@@ -27,3 +29,11 @@ class Librarian (models.Model):
     """
        name = models.CharField(max_length=200)
        library = models.OneToOneField(Library, on_delete=models.CASCADE)
+
+
+def __str__(self):
+        """
+        Returns the string representation of the Author model, which is its name.
+        This is a best practice for Django models.
+        """
+        return self.name
