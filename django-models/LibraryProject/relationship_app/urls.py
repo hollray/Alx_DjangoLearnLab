@@ -21,8 +21,8 @@ path('register/', views.register, name='register'),
     
     # URL for user login, using Django's built-in LoginView.
     # We specify the template name that this view should render.
-path('login/', LoginView.as_view(template_name='registration/login.html'), name='login'),
+path('login/', LoginView.as_view(template_name='relationship_app/login.html'), name='login'),
     
     # URL for user logout, using Django's built-in LogoutView.
     # The 'next_page' argument redirects the user after a successful logout.
-path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
+path('logout/', LogoutView.as_view(template_name='relationship_app/logout.html'), name='logout'),
