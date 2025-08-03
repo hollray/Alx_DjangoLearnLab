@@ -1,23 +1,25 @@
-# Sql queries for relationship app
+# query_samples.py
 
-# Query all books by a specific author.
+# This script is designed to be run from the root of your Django project.
+# It uses the Django ORM to demonstrate how to perform common queries
+# based on relationships between models.
+
 import os
 import django
 
-os.environ.setdefault ('DJANGO_SETTINGS_MODULE', 'LibraryProject.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'your_project_name.settings')
 django.setup()
-
 
 from relationship_app.models import Author, Book, Library, Librarian
 
 def populate_sample_data():
-    """
-    Creates some sample data to query.
-    This function ensures the database has data to work with
-    before we run our queries.
-    """
+    
+   # Creates some sample data to query.
+   # This function ensures the database has data to work with
+   # before we run our queries.
+   # """
     print("Populating sample data...")
-    # Clear existing data to avoid duplicates on multiple runs
+    # Clearing existing data to avoid duplicates on multiple runs
     Librarian.objects.all().delete()
     Library.objects.all().delete()
     Book.objects.all().delete()
@@ -43,25 +45,29 @@ def populate_sample_data():
 
     print("Sample data populated successfully.")
 
+
 def query_books_by_author(author_name):
-      # Query all books by a specific author.
-    # This demonstrates a reverse relationship lookup from Author to Book.
-    # """
+    """
+    Query all books by a specific author.
+    This demonstrates how to use the filter method to find all books
+    related to a specific author.
+    """
     print(f"\n--- Querying all books by '{author_name}' ---")
     try:
-        # Get the author first
+        # Geting the author object first
         author = Author.objects.get(name=author_name)
-        # using the filter method to get all books by this author
-        books = Book.objects.filter(author=author)
         
+        # Using the filter method on the Book model and explicitly call .all()
+     
+        books = Book.objects.filter(author=author).all()
 
         if books:
             for book in books:
                 print(f"  - {book.title}")
         else:
-            print(f"  - No books found for {author}.")
+            print(f"  - No books found for {author_name}.")
     except Author.DoesNotExist:
-        print(f"  - Author '{author}' not found.")
+        print(f"  - Author '{author_name}' not found.")
 
 
 def list_all_books_in_library(library_name):
