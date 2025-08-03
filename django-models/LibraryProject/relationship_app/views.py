@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.views import LogoutView
-from django.contrib.auth.views import Login
+from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from .forms import UserRegistrationForm
 from django.http import HttpResponse
