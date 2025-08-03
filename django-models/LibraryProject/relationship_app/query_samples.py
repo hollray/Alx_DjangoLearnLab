@@ -80,7 +80,8 @@ def list_all_books_in_library(library_name):
         # Get the library first
         library = Library.objects.get(name=library_name)
         # Use the reverse relationship to get all books in this library
-        books = library.book_set.all()
+        books = library.book_set
+        books= books.all()
 
         if books:
             for book in books:
