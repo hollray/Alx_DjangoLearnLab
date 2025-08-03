@@ -13,15 +13,11 @@ def book_list(request):
     # Query all Book objects from the database
     books = Book.objects.all()
 
-    # Create a list of strings, each containing a book's title and author
-    # We use a list comprehension for a concise way to build the list
-    book_titles_and_authors = [f"Title: {book.title}, Author: {book.author.name}" for book in books]
+    # Pass the books to the template as context
+    context = {'books': books}
 
-    # Join the list of strings into a single string with newlines
-    response_text = "\n".join(book_titles_and_authors)
-
-    # Return an HttpResponse with the plain text content
-    return HttpResponse(response_text, content_type="text/plain")
+    # Render the 'list_books.html' template with the context
+    return render(request, 'relationship_app/list_books.html', context)
 
 
 class LibraryDetailView(DetailView):
