@@ -4,7 +4,7 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
-from .forms import UserRegistrationForm
+# from .forms import UserRegistrationForm
 from django.http import HttpResponse
 from django.views.generic import DetailView
 from django.views.generic.detail import DetailView
@@ -61,14 +61,15 @@ def register(request):
     """
     if request.method == 'POST':
         # If the request is POST, process the form data
-        form = UserRegistrationForm(request.POST)
+        # form = UserCreation(request.POST)
+        form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             # Redirect to the login page after successful registration
             return redirect('login')
     else:
         # If the request is GET, display a blank registration form
-        form = UserRegistrationForm()
+        form = UserCreationForm()
     
     # Render the 'register.html' template with the form
     return render(request, 'relationship_app/register.html', {'form': form})
