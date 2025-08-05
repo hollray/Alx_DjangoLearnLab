@@ -60,7 +60,7 @@ def create_or_update_user_profile(sender,instance,created, **kwargs):
     """
       if created:
             # If a new user is created, create a corresponding UserProfile
-            UserProfile.objects.create(User=instance)
+            UserProfile.objects.create(user=instance)
       # Always save the UserProfile to ensure it's updated if the User is updated
       instance.userprofile.save()
 
