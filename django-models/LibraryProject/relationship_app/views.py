@@ -6,12 +6,15 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django.urls import reverse_lazy
 # from .forms import UserRegistrationForm
 from django.http import HttpResponse
 from django.views.generic import DetailView
 from django.views.generic.detail import DetailView
 from .models import Book
 from .models import Library
+from .models import UserProfile
 
 
 # Create your views here.
@@ -83,11 +86,11 @@ def is_admin(user):
     return user.is_authenticated and hasattr(user,'userprofile') and user.userprofile.role == 'Admin'
 
 def is_librarian(user):
-    """ This function checks if the user has an 'Admin' Role """
+    """ This function checks if the user has a 'Librarian' Role """
     return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Librarian'
 
 def is_member(user):
-    """ This function checks if the user has an 'Admin' Role """
+    """ This function checks if the user has a 'Member' Role """
     return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
 
 
@@ -126,3 +129,5 @@ def login_view(request):
     Django's built-in login view or a custom one with authentication logic.
     """
     return render(request, 'login.html', {'message': 'Please log in to access this page.'})
+
+
