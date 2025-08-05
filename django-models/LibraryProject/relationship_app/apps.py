@@ -1,16 +1,11 @@
+# relationship_app/apps.py
 from django.apps import AppConfig
-
 from django.db.models.signals import post_save # Import post_save signal
-from django.contrib import admin
-from .models import Author, Book, Library, Librarian, UserProfile
-from django.dispatch import receiver
-
-
+from django.dispatch import receiver # Import receiver decorator
 
 class RelationshipAppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'relationship_app'
-
 
     def ready(self):
         # Import the User model here to avoid AppRegistryNotReady error
@@ -34,17 +29,3 @@ class RelationshipAppConfig(AppConfig):
                 if hasattr(instance, 'userprofile'):
                     instance.userprofile.save()
 
-
-
-
-
-@admin.register(Book)
-class BookAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author')
-    list_filter = ('author',)
-    search_fields = ('title', 'author__name')
-
-@admin.register(Author)
-class AuthorAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    search_fields = ('name',)
