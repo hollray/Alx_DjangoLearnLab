@@ -69,7 +69,7 @@ def register(request):
         # form = UserCreation(request.POST)
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user=form.save()
             # Redirect to the login page after successful registration
             return redirect('login')
     else:
@@ -128,6 +128,6 @@ def login_view(request):
     A placeholder login view. In a real application, you would use
     Django's built-in login view or a custom one with authentication logic.
     """
-    return render(request, 'login.html', {'message': 'Please log in to access this page.'})
+    return render(request, 'relationship_app/login.html', {'message': 'Please log in to access this page.'})
 
 
