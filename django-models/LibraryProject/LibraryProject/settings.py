@@ -122,3 +122,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# LibraryProject/settings.py
+
+# ... (other settings) ...
+
+LOGIN_REDIRECT_URL = '/admin_view/' # Redirects to the admin view after successful login
+LOGIN_URL = '/login/' # Ensure this is also set for clarity, though it's often implicit
