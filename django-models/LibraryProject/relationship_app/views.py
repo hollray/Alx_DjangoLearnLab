@@ -1,21 +1,10 @@
-from django.shortcuts import render
-from django.shortcuts import redirect
+# relationship_app/views.py
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.mixins import AccessMixin
-from django.contrib.auth.views import LoginView
-from django.contrib.auth.views import LogoutView
-from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.urls import reverse_lazy
-# from .forms import UserRegistrationForm
-from django.http import HttpResponse
 from django.views.generic import DetailView
-from django.views.generic.detail import DetailView
-from .models import Book
-from .models import Library
-from .models import UserProfile
-
+from .models import Book, Library, UserProfile # Ensure all models are imported
 
 # Create your views here.
 def list_books(request):
@@ -66,11 +55,10 @@ def register(request):
     """
     if request.method == 'POST':
         # If the request is POST, process the form data
-        # form = UserCreation(request.POST)
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            user=form.save()
-            # Redirect to the login page after successful registration
+            user = form.save()
+            # UserProfile is created automatically by signal
             return redirect('login')
     else:
         # If the request is GET, display a blank registration form
@@ -83,7 +71,7 @@ def register(request):
 # Helper functions to check user roles
 def is_admin(user):
     """ This function checks if the user has an 'Admin' Role """
-    return user.is_authenticated and hasattr(user,'userprofile') and user.userprofile.role == 'Admin'
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
 
 def is_librarian(user):
     """ This function checks if the user has a 'Librarian' Role """
@@ -100,7 +88,6 @@ def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
     Renders 'admin_view.html'.
-
     """
     return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
 
@@ -109,7 +96,6 @@ def librarian_view(request):
     """
     View accessible only to users with the 'Librarian' role.
     Renders 'librarian_view.html'.
-
     """
     return render(request, 'librarian_view.html', {'message': 'Welcome, Librarian!'})
 
@@ -118,16 +104,15 @@ def member_view(request):
     """
     View accessible only to users with the 'Member' role.
     Renders 'member_view.html'.
-
     """
     return render(request, 'member_view.html', {'message': 'Welcome, Member!'})
 
-# just as seen in a text i added this basic login view...also want a basic login view or use Django's built-in auth views
+# The custom login_view function
 def login_view(request):
     """
     A placeholder login view. In a real application, you would use
     Django's built-in login view or a custom one with authentication logic.
     """
+    # THIS IS THE CRITICAL FIX: Explicitly specify the nested template path
     return render(request, 'relationship_app/login.html', {'message': 'Please log in to access this page.'})
-
 
