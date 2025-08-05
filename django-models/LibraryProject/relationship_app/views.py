@@ -85,20 +85,18 @@ def is_member(user):
 
 # Views with role-based access control
 # The decorator now only ensures the user is authenticated.
-# The role check and explicit redirect are handled inside the view.
+# The role check and explicit 403 are handled inside the view.
 @user_passes_test(lambda u: u.is_authenticated, login_url='/login/')
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
     Renders 'admin_view.html'.
-    If an authenticated non-admin user tries to access, they are redirected to the login page,
-    and the browser's URL bar will update to reflect the login page URL.
+    If an authenticated non-admin user tries to access, they receive a 403 Forbidden.
     """
     # Explicitly check if the authenticated user has the 'Admin' role
     if not is_admin(request.user):
-        # Perform a full HTTP redirect to the login page,
-        # passing the original path in 'next' for potential post-login redirection.
-        return redirect('/login/?next=' + request.path)
+        # Return a 403 Forbidden response directly
+        return HttpResponseForbidden("You do not have permission to access this page (Admin access required).")
     
     return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
 
