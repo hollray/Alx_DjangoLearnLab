@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.views.generic import DetailView
 from .models import Book, Library, UserProfile # Ensure all models are imported
-from django.http import Http404, HttpResponseForbidden # Import Http404 and HttpResponseForbidden
+from django.http import Http404, HttpResponseForbidden # Import Http404 and HttpResponseForbidden (though HttpResponseForbidden is not used in admin_view now)
 
 # Create your views here.
 def list_books(request):
@@ -84,20 +84,19 @@ def is_member(user):
 
 
 # Views with role-based access control
-# The decorator now only ensures the user is authenticated.
-# The role check and explicit 403 are handled inside the view.
-@user_passes_test(lambda u: u.is_authenticated, login_url='/login/')
+# The decorator now directly checks the 'is_admin' function.
+# If the test fails (user is not admin or not authenticated),
+# they will be redirected to the 'login_url'.
+@user_passes_test(is_admin, login_url='/login/')
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
     Renders 'admin_view.html'.
-    If an authenticated non-admin user tries to access, they receive a 403 Forbidden.
+    If a non-admin user (authenticated or unauthenticated) tries to access,
+    they will be redirected to the login page.
     """
-    # Explicitly check if the authenticated user has the 'Admin' role
-    if not is_admin(request.user):
-        # Return a 403 Forbidden response directly
-        return HttpResponseForbidden("You do not have permission to access this page (Admin access required).")
-    
+    # The role check is now entirely handled by the @user_passes_test decorator.
+    # No explicit if-check for role is needed here.
     return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
 
 @user_passes_test(is_librarian, login_url='/login/')
