@@ -23,7 +23,8 @@ class Book(models.Model):
     Represents a book with a title, author.
     """
     title = models.CharField(max_length=200)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='author_books') # Changed related_name to avoid conflict
+    # Changed related_name to 'books_by_author' to avoid potential conflicts
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='books_by_author')
 
     def __str__(self):
         return self.title
@@ -63,7 +64,7 @@ class UserProfile(models.Model):
     role = models.CharField(
         max_length=10,
         choices=UserRole.choices,
-        default=UserRole.MEMBER, #Default Role for Users
+        default=UserRole.MEMBER, # Default Role for Users
         help_text="User's assigned role in the system."
     )
 
@@ -84,9 +85,9 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
     if created:
         # If a new user is created, create a corresponding UserProfile
         UserProfile.objects.create(user=instance)
-    # Always save the UserProfile to ensure it's updated if the User is updated
-    # This check ensures we only try to save if the userprofile attribute exists
-    # which it will after the create() call or if it's an existing user.
-    if hasattr(instance, 'userprofile'):
-        instance.userprofile.save()
+    else:
+        # For existing users, ensure their UserProfile is saved if it exists
+        # This handles cases where a user might be updated but their profile isn't.
+        if hasattr(instance, 'userprofile'):
+            instance.userprofile.save()
 
