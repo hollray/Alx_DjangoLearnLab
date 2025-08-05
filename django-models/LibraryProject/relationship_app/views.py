@@ -4,11 +4,8 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.views.generic import DetailView
-from .models import Book
-from .models import Library
-from .models import UserProfile # Ensure all models are imported
-from django.http import Http404
-from django.http import HttpResponseForbidden # Import Http404 and HttpResponseForbidden
+from .models import Book, Library, UserProfile # Ensure all models are imported
+from django.http import Http404, HttpResponseForbidden # Import Http404 and HttpResponseForbidden
 
 # Create your views here.
 def list_books(request):
@@ -87,17 +84,21 @@ def is_member(user):
 
 
 # Views with role-based access control
-# Removed raise_exception=True from the decorator
-@user_passes_test(is_admin, login_url='/login/') # Redirects to /login/ if test fails
+# The decorator now only ensures the user is authenticated.
+# The role check and explicit redirect are handled inside the view.
+@user_passes_test(lambda u: u.is_authenticated, login_url='/login/')
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
     Renders 'admin_view.html'.
-    If a non-admin user tries to access, it will raise a 403 Forbidden error.
+    If an authenticated non-admin user tries to access, they are redirected to the login page,
+    and the browser's URL bar will update to reflect the login page URL.
     """
-    # Explicitly check if the user is an admin after authentication
+    # Explicitly check if the authenticated user has the 'Admin' role
     if not is_admin(request.user):
-        return HttpResponseForbidden("You do not have permission to access this page (Admin access required).")
+        # Perform a full HTTP redirect to the login page,
+        # passing the original path in 'next' for potential post-login redirection.
+        return redirect('/login/?next=' + request.path)
     
     return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
 
@@ -117,11 +118,4 @@ def member_view(request):
     """
     return render(request, 'member_view.html', {'message': 'Welcome, Member!'})
 
-# The custom login_view function
-def login_view(request):
-    """
-    A placeholder login view. In a real application, you would use
-    Django's built-in login view or a custom one with authentication logic.
-    """
-    return render(request, 'relationship_app/login.html', {'message': 'Please log in to access this page.'})
-
+# The custom login_view function has been removed from here.
