@@ -4,7 +4,11 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.views.generic import DetailView
-from .models import Book, Library, UserProfile # Ensure all models are imported
+from .models import Book
+from .models import Library
+from .models import UserProfile # Ensure all models are imported
+from django.http import Http404
+from django.http import HttpResponseForbidden # Import Http404 and HttpResponseForbidden
 
 # Create your views here.
 def list_books(request):
@@ -83,15 +87,21 @@ def is_member(user):
 
 
 # Views with role-based access control
-@user_passes_test(is_admin, login_url='/login/') # This line ensures that it Redirects to /login/ if test fails
+# Removed raise_exception=True from the decorator
+@user_passes_test(is_admin, login_url='/login/') # Redirects to /login/ if test fails
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
     Renders 'admin_view.html'.
+    If a non-admin user tries to access, it will raise a 403 Forbidden error.
     """
+    # Explicitly check if the user is an admin after authentication
+    if not is_admin(request.user):
+        return HttpResponseForbidden("You do not have permission to access this page (Admin access required).")
+    
     return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
 
-@user_passes_test(is_librarian, login_url='/login/') # This line ensures that it Redirects to /login/ if test fails
+@user_passes_test(is_librarian, login_url='/login/')
 def librarian_view(request):
     """
     View accessible only to users with the 'Librarian' role.
@@ -99,7 +109,7 @@ def librarian_view(request):
     """
     return render(request, 'librarian_view.html', {'message': 'Welcome, Librarian!'})
 
-@user_passes_test(is_member, login_url='/login/') # This line ensures that it Redirects to /login/ if test fails
+@user_passes_test(is_member, login_url='/login/')
 def member_view(request):
     """
     View accessible only to users with the 'Member' role.
@@ -113,6 +123,5 @@ def login_view(request):
     A placeholder login view. In a real application, you would use
     Django's built-in login view or a custom one with authentication logic.
     """
-    # THIS IS THE CRITICAL FIX: Explicitly specify the nested template path
     return render(request, 'relationship_app/login.html', {'message': 'Please log in to access this page.'})
 
