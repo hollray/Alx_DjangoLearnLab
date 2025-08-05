@@ -25,14 +25,17 @@ path('logout/', LogoutView.as_view(template_name='relationship_app/logout.html')
 
 
    # URL for the Admin view
-    path('admin-dashboard/', views.admin_view, name='admin_dashboard'),
+    path('admin-dashboard/', views.admin_view, name='admin_view'),
     # URL for the Librarian view
-    path('librarian-dashboard/', views.librarian_view, name='librarian_dashboard'),
+    path('librarian-dashboard/', views.librarian_view, name='librarian_view'),
     # URL for the Member view
-    path('member-dashboard/', views.member_view, name='member_dashboard'),
+    path('member-dashboard/', views.member_view, name='member_view'),
     
     # New URL pattern for the LibraryDetailView
     # The '<pk>' captures the primary key from the URL and passes it to the view.
     path('libraries/<int:pk>/', views.LibraryDetailView.as_view(), name='library_detail'),
+
+     # A simple home page or redirect for testing
+    path('', views.login_view, name='home'),
 ]
 
