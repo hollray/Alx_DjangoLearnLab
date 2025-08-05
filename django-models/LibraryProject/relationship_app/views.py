@@ -5,7 +5,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.views.generic import DetailView
 from .models import Book, Library, UserProfile # Ensure all models are imported
-from django.http import Http404, HttpResponseForbidden # Import Http404 and HttpResponseForbidden (though HttpResponseForbidden is not used in admin_view now)
+# Removed Http404, HttpResponseForbidden as they are not used in this version of admin_view
+# from django.http import Http404, HttpResponseForbidden
 
 # Create your views here.
 def list_books(request):
@@ -95,8 +96,6 @@ def admin_view(request):
     If a non-admin user (authenticated or unauthenticated) tries to access,
     they will be redirected to the login page.
     """
-    # The role check is now entirely handled by the @user_passes_test decorator.
-    # No explicit if-check for role is needed here.
     return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
 
 @user_passes_test(is_librarian, login_url='/login/')
