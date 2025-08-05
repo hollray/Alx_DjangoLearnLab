@@ -26,6 +26,14 @@ class Book(models.Model):
     # Changed related_name to 'books_by_author' to avoid potential conflicts
     author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='books_by_author')
 
+    class Meta:
+        # Define custom permissions for the Book model
+        permissions = [
+            ("can_add_book", "Can add new book"),
+            ("can_change_book", "Can change book details"),
+            ("can_delete_book", "Can delete book"),
+        ]
+
     def __str__(self):
         return self.title
 
