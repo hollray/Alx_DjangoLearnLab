@@ -1,5 +1,7 @@
 # relationship_app/views.py
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render,
+from django.shortcuts import redirect,
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import UserCreationForm
@@ -88,6 +90,7 @@ def is_member(user):
 # Views with role-based access control
 # The decorator ensures the user is authenticated.
 @user_passes_test(lambda u: u.is_authenticated, login_url='/login/')
+# @user_passes_test(is_admin, login_url='/login/')
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
@@ -96,7 +99,8 @@ def admin_view(request):
     """
     # Check if the user is an Admin
     if is_admin(request.user):
-        return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
+        # return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
+        return render(request, 'admin_view.html')
     elif is_librarian(request.user):
         # If not Admin, but is Librarian, redirect to Librarian dashboard
         return redirect('librarian_view')
