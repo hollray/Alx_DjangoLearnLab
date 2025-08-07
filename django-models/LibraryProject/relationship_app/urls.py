@@ -37,9 +37,13 @@ urlpatterns = [
 
     
     # --- New URLs for Book Permissions ---
-    path('books/add/', views.add_book, name='add_book'),
-    path('books/edit/<int:pk>/', views.edit_book, name='edit_book'),
-    path('books/delete/<int:pk>/', views.delete_book, name='delete_book'),
+    # path('books/add/', views.add_book, name='add_book'),
+    # path('books/edit/<int:pk>/', views.edit_book, name='edit_book'),
+    # path('books/delete/<int:pk>/', views.delete_book, name='delete_book'),
+    path('add_book/', views.add_book, name='add_book'),
+    path('edit_book/<int:pk>/', views.edit_book, name='edit_book'),
+    path('delete_book_confirm/<int:pk>/', views.delete_book, name='delete_book'),
+
 
     # A simple home page that redirects to the login page
     # This replaces your custom login_view for the root path
