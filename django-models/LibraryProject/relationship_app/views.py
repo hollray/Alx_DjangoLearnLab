@@ -2,6 +2,7 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import UserCreationForm
@@ -89,7 +90,7 @@ def is_member(user):
 
 # Views with role-based access control
 # The decorator ensures the user is authenticated.
-
+@login_required
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
