@@ -90,8 +90,8 @@ def is_member(user):
 
 # Views with role-based access control
 # The decorator ensures the user is authenticated.
-# @user_passes_test(lambda u: u.is_authenticated, login_url='/login/')
-@user_passes_test(is_admin, login_url='/login/')
+@user_passes_test(lambda u: u.is_authenticated, login_url='/login/')
+# @user_passes_test(is_admin, login_url='/login/')
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
@@ -100,8 +100,18 @@ def admin_view(request):
     """
     # Check if the user is an Admin
     if is_admin(request.user):
-    
-     return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
+        request.user.has_perm('add_book')
+        return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
+    elif is_librarian(request.user):
+        # If not Admin, but is Librarian, redirect to Librarian dashboard
+        return redirect('librarian_view')
+    elif is_member(request.user):
+        # If not Admin or Librarian, but is Member, redirect to Member dashboard
+        return redirect('member_view')
+    else:
+        # If authenticated but none of the defined roles, deny access
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
 @user_passes_test(is_librarian, login_url='/login/')
 def librarian_view(request):
     """
