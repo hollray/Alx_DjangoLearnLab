@@ -100,6 +100,7 @@ def admin_view(request):
     """
     # Check if the user is an Admin
     if is_admin(request.user):
+        request.user.has_perm('add_book')
         return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
     elif is_librarian(request.user):
         # If not Admin, but is Librarian, redirect to Librarian dashboard
