@@ -33,7 +33,7 @@ urlpatterns = [
 
     # A simple home page that redirects to the login page
     # This replaces your custom login_view for the root path
-    path('', RedirectView.as_view(url=reverse_lazy('login')), name='home'),
+    #path('', RedirectView.as_view(url=reverse_lazy('login')), name='home'),
 
     
     # --- New URLs for Book Permissions ---

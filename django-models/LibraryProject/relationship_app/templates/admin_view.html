@@ -25,14 +25,27 @@
             <div class="bg-indigo-50 p-6 rounded-lg shadow-md">
                 <h3 class="text-xl font-semibold text-indigo-800 mb-3">User Management</h3>
                 <p class="text-gray-700">Add, edit, or delete user accounts and assign roles.</p>
-                <a href="{% url 'register' %}" class="mt-4 inline-block bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-150 ease-in-out">Manage Users</a>
+                <a href="{% url 'register' %}" class="mt-4 inline-block bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-150 ease-in-out">REGISTER NEW Users</a>
             </div>
             <div class="bg-indigo-50 p-6 rounded-lg shadow-md">
-                <h3 class="text-xl font-semibold text-indigo-800 mb-3">System Settings</h3>
+                <h3 class="text-xl font-semibold text-indigo-800 mb-3">LIST USER</h3>
                 <p class="text-gray-700">Configure application-wide settings and preferences.</p>
-                <a href="#" class="mt-4 inline-block bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-150 ease-in-out">Settings</a>
+                <a href="http://127.0.0.1:8000/admin/relationship_app/userprofile/" class="mt-4 inline-block bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-150 ease-in-out">Settings</a>
             </div>
         </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-indigo-50 p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold text-indigo-800 mb-3">BOOK MANAGEMENT</h3>
+                <p class="text-gray-700">Add, edit, or delete Books and Libraries.</p>
+                <a href="{% url 'add_book' %}" class="mt-4 inline-block bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-150 ease-in-out">Add New Book</a>
+            </div>
+             <div class="bg-indigo-50 p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold text-indigo-800 mb-3">List Books</h3>
+                <p class="text-gray-700">List all the books in the library</p>
+                <a href="{% url 'list_books' %}" class="mt-4 inline-block bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-150 ease-in-out">Settings</a>
+            </div>
+        </div>
+        
         <a href="{% url 'logout' %}" class="mt-8 inline-block bg-red-600 text-white py-2 px-6 rounded-md hover:bg-red-700 transition duration-150 ease-in-out">Logout</a>
     </div>
 </body>
