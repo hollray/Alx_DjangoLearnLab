@@ -99,7 +99,7 @@ def admin_view(request):
     to their respective dashboard (Librarian or Member) or receive a 403 Forbidden.
     """
     # Check if the user is an Admin
-    if is_admin(request.user) and request.user.has_perm('Admin'):
+    if is_admin(request.user):
         return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
     elif is_librarian(request.user):
         # If not Admin, but is Librarian, redirect to Librarian dashboard
