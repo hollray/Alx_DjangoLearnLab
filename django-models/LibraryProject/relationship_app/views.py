@@ -1,6 +1,10 @@
 # relationship_app/views.py
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import user_passes_test, permission_required
+from django.shortcuts import render
+from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.views.generic import DetailView
@@ -86,15 +90,27 @@ def is_member(user):
 
 # Views with role-based access control
 # The decorator ensures the user is authenticated.
-@user_passes_test(is_admin, login_url='/login/')
+@user_passes_test(lambda u: u.is_authenticated, login_url='/login/')
+# @user_passes_test(is_admin, login_url='/login/')
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
-    Renders 'admin_view.html'.
-    If a non-admin user (authenticated or unauthenticated) tries to access,
-    they will be redirected to the login page by the decorator.
+    If a non-admin user (authenticated) tries to access, they are redirected
+    to their respective dashboard (Librarian or Member) or receive a 403 Forbidden.
     """
-    return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
+    # Check if the user is an Admin
+    if is_admin(request.user):
+        request.user.has_perm('add_book')
+        return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
+    elif is_librarian(request.user):
+        # If not Admin, but is Librarian, redirect to Librarian dashboard
+        return redirect('librarian_view')
+    elif is_member(request.user):
+        # If not Admin or Librarian, but is Member, redirect to Member dashboard
+        return redirect('member_view')
+    else:
+        # If authenticated but none of the defined roles, deny access
+        return HttpResponseForbidden("You do not have permission to access this page.")
 
 @user_passes_test(is_librarian, login_url='/login/')
 def librarian_view(request):
@@ -120,7 +136,6 @@ def add_book(request):
     """
     View to add a new book. Requires 'can_add_book' permission.
     """
-    from .forms import BookForm # Import here to avoid circular imports and AppRegistryNotReady issues
     if request.method == 'POST':
         form = BookForm(request.POST)
         if form.is_valid():
@@ -135,7 +150,6 @@ def edit_book(request, pk):
     """
     View to edit an existing book. Requires 'can_change_book' permission.
     """
-    from .forms import BookForm # Import here to avoid circular imports and AppRegistryNotReady issues
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
         form = BookForm(request.POST, instance=book)
@@ -156,3 +170,4 @@ def delete_book(request, pk):
         book.delete()
         return redirect('list_books') # Redirect to book list after deleting
     return render(request, 'relationship_app/delete_book_confirm.html', {'book': book})
+
