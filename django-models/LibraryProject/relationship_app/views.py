@@ -2,10 +2,12 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.views.generic import DetailView
 from .models import Book, Library, UserProfile # Ensure all models are imported
@@ -65,13 +67,30 @@ def register(request):
         if form.is_valid():
             user = form.save()
             # UserProfile is created automatically by signal
+            login(request, user)
             return redirect('login')
     else:
         # If the request is GET, display a blank registration form
         form = UserCreationForm()
-    
-    # Render the 'register.html' template with the form
     return render(request, 'relationship_app/register.html', {'form': form})
+
+
+# defined login_view
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('list_books')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'relationship_app/login.html', {'form': form})
+
+# defined logout_view
+def logout_view(request):
+    logout(request)
+    return render(request, 'relationship_app/logout.html')
 
 
 # Helper functions to check user roles
@@ -90,8 +109,9 @@ def is_member(user):
 
 # Views with role-based access control
 # The decorator ensures the user is authenticated.
-@user_passes_test(lambda u: u.is_authenticated, login_url='/login/')
-# @user_passes_test(is_admin, login_url='/login/')
+@login_required
+# @user_passes_test(lambda u: u.is_authenticated, login_url='/login/')
+@user_passes_test(is_admin, login_url='/login/')
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
@@ -112,6 +132,7 @@ def admin_view(request):
         # If authenticated but none of the defined roles, deny access
         return HttpResponseForbidden("You do not have permission to access this page.")
 
+@login_required
 @user_passes_test(is_librarian, login_url='/login/')
 def librarian_view(request):
     """
@@ -120,6 +141,7 @@ def librarian_view(request):
     """
     return render(request, 'librarian_view.html', {'message': 'Welcome, Librarian!'})
 
+@login_required
 @user_passes_test(is_member, login_url='/login/')
 def member_view(request):
     """
@@ -131,7 +153,7 @@ def member_view(request):
 
 # --- New Views for Book Permissions ---
 
-@permission_required('relationship_app.can_add_book', login_url='/login/')
+@permission_required('relationship_app.can_add_book', raise_exception=True)
 def add_book(request):
     """
     View to add a new book. Requires 'can_add_book' permission.

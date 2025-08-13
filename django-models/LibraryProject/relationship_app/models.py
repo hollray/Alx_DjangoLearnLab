@@ -59,29 +59,18 @@ class Librarian(models.Model):
 
 
 # Define role choices for the UserProfile
-class UserRole(models.TextChoices):
-    ADMIN = 'Admin', 'Admin'
-    LIBRARIAN = 'Librarian', 'Librarian'
-    MEMBER = 'Member', 'Member'
 
 class UserProfile(models.Model):
-    """ Extends the Django User model to include a role for the user.
-    Uses a OneToOneField to link to Django's built-in User model.
-    """
+    UserRole = [
+        ('Admin', 'Admin'),
+        ('Librarian', 'Librarian'),
+        ('Member', 'Member'),
+    ]
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role = models.CharField(
-        max_length=10,
-        choices=UserRole.choices,
-        default=UserRole.MEMBER, # Default Role for Users
-        help_text="User's assigned role in the system."
-    )
+    role = models.CharField(max_length=20, choices=UserRole)
 
     def __str__(self):
-        """
-        Returns a string representation of the UserProfile,
-        combining the username and their role.
-        """
-        return f'{self.user.username} - {self.role}'
+        return f"{self.user.username} - {self.role}"
 
 # Signal to automatically create a UserProfile when a new User is created
 # @receiver(post_save, sender=User)
