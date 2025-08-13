@@ -1,36 +1,22 @@
-# relationship_app/models.py
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-# from django.dispatch import receiver
+from django.dispatch import receiver
 
-# Create your models here.
 class Author(models.Model):
-    """
-    Represents an Author model with name.
-    """
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=100)
 
     def __str__(self):
-        """
-        Returns the string representation of the Author model, which is its name.
-        This is a best practice for Django models.
-        """
         return self.name
 
 class Book(models.Model):
-    """
-    Represents a book with a title, author.
-    """
-    title = models.CharField(max_length=200)
-    # Changed related_name to 'books_by_author' to avoid potential conflicts
-    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='books_by_author')
+    title = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
 
     class Meta:
-        # Define custom permissions for the Book model
         permissions = [
-            ("can_add_book", "Can add new book"),
-            ("can_change_book", "Can change book details"),
+            ("can_add_book", "Can add book"),
+            ("can_change_book", "Can change book"),
             ("can_delete_book", "Can delete book"),
         ]
 
@@ -38,53 +24,33 @@ class Book(models.Model):
         return self.title
 
 class Library(models.Model):
-    """
-    Represents a library model with name and books.
-    """
-    name = models.CharField(max_length=200)
-    books = models.ManyToManyField(Book, related_name='libraries')
+    name = models.CharField(max_length=100)
+    books = models.ManyToManyField(Book)
 
     def __str__(self):
         return self.name
 
 class Librarian(models.Model):
-    """
-    Represents a librarian model with a name of the librarian and the library.
-    """
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=100)
     library = models.OneToOneField(Library, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
-
-# Define role choices for the UserProfile
-
 class UserProfile(models.Model):
-    UserRole = [
+    ROLE_CHOICES = [
         ('Admin', 'Admin'),
         ('Librarian', 'Librarian'),
         ('Member', 'Member'),
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role = models.CharField(max_length=20, choices=UserRole)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
 
     def __str__(self):
         return f"{self.user.username} - {self.role}"
 
-# Signal to automatically create a UserProfile when a new User is created
-# @receiver(post_save, sender=User)
-def create_or_update_user_profile(sender, instance, created, **kwargs):
-    """
-    This signal receiver automatically creates a UserProfile for a new User.
-    If the User already exists, it ensures the UserProfile is saved.
-    """
+# Automatically create a UserProfile whenever a new user is created
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        # If a new user is created, create a corresponding UserProfile
         UserProfile.objects.create(user=instance)
-    else:
-        # For existing users, ensure their UserProfile is saved if it exists
-        # This handles cases where a user might be updated but their profile isn't.
-        if hasattr(instance, 'userprofile'):
-            instance.userprofile.save()
-
