@@ -155,41 +155,27 @@ def member_view(request):
 
 @permission_required('relationship_app.can_add_book', raise_exception=True)
 def add_book(request):
-    """
-    View to add a new book. Requires 'can_add_book' permission.
-    """
     if request.method == 'POST':
-        form = BookForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('list_books') # Redirect to book list after adding
-    else:
-        form = BookForm()
-    return render(request, 'relationship_app/add_book.html', {'form': form})
+        title = request.POST.get('title')
+        author = request.POST.get('author')
+        Book.objects.create(title=title, author=author)
+        return redirect('book_list')  
+    return render(request, 'add_book.html')
 
-@permission_required('relationship_app.can_change_book', login_url='/login/')
-def edit_book(request, pk):
-    """
-    View to edit an existing book. Requires 'can_change_book' permission.
-    """
-    book = get_object_or_404(Book, pk=pk)
+@permission_required('relationship_app.can_change_book', raise_exception=True)
+def edit_book(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
     if request.method == 'POST':
-        form = BookForm(request.POST, instance=book)
-        if form.is_valid():
-            form.save()
-            return redirect('list_books') # Redirect to book list after editing
-    else:
-        form = BookForm(instance=book)
-    return render(request, 'relationship_app/edit_book.html', {'form': form, 'book': book})
+        book.title = request.POST.get('title')
+        book.author = request.POST.get('author')
+        book.save()
+        return redirect('book_list')
+    return render(request, 'edit_book.html', {'book': book})
 
-@permission_required('relationship_app.can_delete_book', login_url='/login/')
-def delete_book(request, pk):
-    """
-    View to delete a book. Requires 'can_delete_book' permission.
-    """
-    book = get_object_or_404(Book, pk=pk)
+@permission_required('relationship_app.can_delete_book', raise_exception=True)
+def delete_book(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
     if request.method == 'POST':
         book.delete()
-        return redirect('list_books') # Redirect to book list after deleting
-    return render(request, 'relationship_app/delete_book_confirm.html', {'book': book})
-
+        return redirect('book_list')
+    return render(request, 'delete_book.html', {'book': book})
