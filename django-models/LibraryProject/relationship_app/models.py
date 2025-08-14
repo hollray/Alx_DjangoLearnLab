@@ -109,9 +109,9 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
     if created:
         # If a new user is created, create a corresponding UserProfile
         UserProfile.objects.create(user=instance)
-    else:
+   # else:
         # For existing users, ensure their UserProfile is saved if it exists
         # This handles cases where a user might be updated but their profile isn't.
-        if hasattr(instance, 'userprofile'):
-            instance.userprofile.save()
+   #     if hasattr(instance, 'userprofile'):
+   #         instance.userprofile.save()
 
