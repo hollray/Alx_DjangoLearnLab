@@ -90,8 +90,8 @@ def is_member(user):
 
 # Views with role-based access control
 # The decorator ensures the user is authenticated.
-@user_passes_test(lambda u: u.is_authenticated, login_url='/login/')
-# @user_passes_test(is_admin, login_url='/login/')
+# @user_passes_test(lambda u: u.is_authenticated, login_url='/login/')
+@user_passes_test(is_admin, login_url='/login/')
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
