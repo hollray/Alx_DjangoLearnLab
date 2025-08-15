@@ -1,18 +1,11 @@
 # relationship_app/views.py
-from django.shortcuts import render
-from django.shortcuts import redirect
-from django.shortcuts import get_object_or_404
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import permission_required
-from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.models import User
 from django.views.generic import DetailView
 from .models import Book, Library, UserProfile # Ensure all models are imported
-from .forms import BookForm # Import the new BookForm
-from django.http import Http404, HttpResponseForbidden # Import Http404 and HttpResponseForbidden
+from .forms import BookForm # This is required for the book management views
+from django.http import Http404, HttpResponseForbidden
 
 # Create your views here.
 def list_books(request):
@@ -66,9 +59,8 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request,user)
             # UserProfile is created automatically by signal
-            return redirect('list_books')
+            return redirect('login')
     else:
         # If the request is GET, display a blank registration form
         form = UserCreationForm()
@@ -76,61 +68,33 @@ def register(request):
     # Render the 'register.html' template with the form
     return render(request, 'relationship_app/register.html', {'form': form})
 
-def login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('list_books')
-    else:
-        form = AuthenticationForm()
-    return render(request, 'relationship_app/login.html', {'form': form})
-
-def logout_view(request):
-    logout(request)
-    return render(request, 'relationship_app/logout.html')
-
 
 # Helper functions to check user roles
 def is_admin(user):
     """ This function checks if the user has an 'Admin' Role """
-    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
+    return hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
 
 def is_librarian(user):
     """ This function checks if the user has a 'Librarian' Role """
-    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Librarian'
+    return hasattr(user, 'userprofile') and user.userprofile.role == 'Librarian'
 
 def is_member(user):
     """ This function checks if the user has a 'Member' Role """
-    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
+    return hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
 
 
 # Views with role-based access control
-# The decorator ensures the user is authenticated.
-# @user_passes_test(lambda u: u.is_authenticated, login_url='/login/')
-@user_passes_test(is_admin, login_url='/login/')
+@login_required
+@user_passes_test(is_admin)
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
-    If a non-admin user (authenticated) tries to access, they are redirected
-    to their respective dashboard (Librarian or Member) or receive a 403 Forbidden.
+    The decorators handle the authentication and role check.
     """
-    # Check if the user is an Admin
-    if is_admin(request.user):
-        request.user.has_perm('add_book')
-        return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
-    elif is_librarian(request.user):
-        # If not Admin, but is Librarian, redirect to Librarian dashboard
-        return redirect('librarian_view')
-    elif is_member(request.user):
-        # If not Admin or Librarian, but is Member, redirect to Member dashboard
-        return redirect('member_view')
-    else:
-        # If authenticated but none of the defined roles, deny access
-        return HttpResponseForbidden("You do not have permission to access this page.")
+    return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
 
-@user_passes_test(is_librarian, login_url='/login/')
+@login_required
+@user_passes_test(is_librarian)
 def librarian_view(request):
     """
     View accessible only to users with the 'Librarian' role.
@@ -138,7 +102,8 @@ def librarian_view(request):
     """
     return render(request, 'librarian_view.html', {'message': 'Welcome, Librarian!'})
 
-@user_passes_test(is_member, login_url='/login/')
+@login_required
+@user_passes_test(is_member)
 def member_view(request):
     """
     View accessible only to users with the 'Member' role.
@@ -149,29 +114,44 @@ def member_view(request):
 
 # --- New Views for Book Permissions ---
 
-@permission_required('relationship_app.can_add_book', raise_exception=True)
+@permission_required('relationship_app.can_add_book', login_url='/login/')
 def add_book(request):
+    """
+    View to add a new book. Requires 'can_add_book' permission.
+    """
+    from .forms import BookForm # Import here to avoid circular imports and AppRegistryNotReady issues
     if request.method == 'POST':
-        title = request.POST.get('title')
-        author = request.POST.get('author')
-        Book.objects.create(title=title, author=author)
-        return redirect('book_list')  
-    return render(request, 'add_book.html')
+        form = BookForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('list_books') # Redirect to book list after adding
+    else:
+        form = BookForm()
+    return render(request, 'relationship_app/add_book.html', {'form': form})
 
-@permission_required('relationship_app.can_change_book', raise_exception=True)
-def edit_book(request, book_id):
-    book = get_object_or_404(Book, id=book_id)
+@permission_required('relationship_app.can_change_book', login_url='/login/')
+def edit_book(request, pk):
+    """
+    View to edit an existing book. Requires 'can_change_book' permission.
+    """
+    from .forms import BookForm # Import here to avoid circular imports and AppRegistryNotReady issues
+    book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
-        book.title = request.POST.get('title')
-        book.author = request.POST.get('author')
-        book.save()
-        return redirect('book_list')
-    return render(request, 'edit_book.html', {'book': book})
+        form = BookForm(request.POST, instance=book)
+        if form.is_valid():
+            form.save()
+            return redirect('list_books') # Redirect to book list after editing
+    else:
+        form = BookForm(instance=book)
+    return render(request, 'relationship_app/edit_book.html', {'form': form, 'book': book})
 
-@permission_required('relationship_app.can_delete_book', raise_exception=True)
-def delete_book(request, book_id):
-    book = get_object_or_404(Book, id=book_id)
+@permission_required('relationship_app.can_delete_book', login_url='/login/')
+def delete_book(request, pk):
+    """
+    View to delete a book. Requires 'can_delete_book' permission.
+    """
+    book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
         book.delete()
-        return redirect('book_list')
-    return render(request, 'delete_book.html', {'book': book})
+        return redirect('list_books') # Redirect to book list after deleting
+    return render(request, 'relationship_app/delete_book_confirm.html', {'book': book})
