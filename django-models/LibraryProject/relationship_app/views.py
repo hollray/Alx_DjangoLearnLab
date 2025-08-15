@@ -107,9 +107,22 @@ def is_member(user):
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
-    The decorators handle the authentication and role check.
+    If a non-admin user (authenticated) tries to access, they are redirected
+    to their respective dashboard (Librarian or Member) or receive a 403 Forbidden.
     """
-    return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
+    # Check if the user is an Admin
+    if is_admin(request.user):
+        return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
+    elif is_librarian(request.user):
+        # If not Admin, but is Librarian, redirect to Librarian dashboard
+        return redirect('librarian_view')
+    elif is_member(request.user):
+        # If not Admin or Librarian, but is Member, redirect to Member dashboard
+        return redirect('member_view')
+    else:
+        # If authenticated but none of the defined roles, deny access
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
 
 @login_required
 @user_passes_test(is_librarian)
