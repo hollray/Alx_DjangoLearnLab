@@ -31,8 +31,8 @@ urlpatterns = [
     path('', relationship_app_views.list_books, name='home'),
     #path('', include('relationship_app.urls')),  # <-- Added this line myself
     path('register/', relationship_app_views.register, name='register'),
-#path('login/', relationship_app_views.login_view, name='login'), # Assuming login_view exists
-    #path('logout/', relationship_app_views.logout_view, name='logout'), # Assuming logout_view exists
+    path('login/', relationship_app_views.login_view, name='login'), # Assuming login_view exists
+    path('logout/', relationship_app_views.logout_view, name='logout'), # Assuming logout_view exists
     path('list_books/', relationship_app_views.list_books, name='list_books'),
     path('admin-view/', relationship_app_views.admin_view, name='admin_view'),
     path('librarian-view/', relationship_app_views.librarian_view, name='librarian_view'),
