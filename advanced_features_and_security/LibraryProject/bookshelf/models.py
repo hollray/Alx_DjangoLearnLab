@@ -24,7 +24,7 @@ class Book(models.Model):
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, email, password=None, **extra_fields):
         if not email:
-            raise ValueError(_('The Email field must be set'))
+            raise ValueError(_('The Email field is compusory, it must be an email'))
         email = self.normalize_email(email)
         user = self.model(username=username, email=email, **extra_fields)
         user.set_password(password)
@@ -39,21 +39,16 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(username, email, password, **extra_fields)
 
 
+
 class CustomUser(AbstractUser):
     # ... other fields
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='custom_user_groups',  # Added this line
-        blank=True,
-        help_text=('The groups this user belongs to. A user will get all permissions '
-                   'granted to each of their groups.'),
-        related_query_name='custom_user',
-    )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='custom_user_permissions',  # Added this line
-        blank=True,
-        help_text='Specific permissions for this user.',
-        related_query_name='custom_user',
-    )
-    
+    email = models.EmailField(unique=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
+    objects = CustomUserManager()
+
+    REQUIRED_FIELDS = ['email', 'date_of_birth']
+    USERNAME_FIELD = 'username'  # Or use email if preferred
+
+    def __str__(self):
+        return self.username
