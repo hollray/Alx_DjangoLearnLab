@@ -23,9 +23,33 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-cki02d7es3gus4#5rg)3!1u_hh5jq$)a6l+6j$g%f^$_6^fsrv'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
-ALLOWED_HOSTS = []
+SECURE_BROWSER_XSS_FILTER = True
+# Clickjacking protection
+X_FRAME_OPTIONS = 'DENY' # Blocks iframe embedding
+
+# X-Content-Type-Options
+SECURE_CONTENT_TYPE_NOSNIFF = True # Prevents MIME-type sniffing
+
+
+# CSRF protection enabled using {% csrf_token %} in all form templates
+
+# Secure cookie settings
+CSRF_COOKIE_SECURE = True # Ensures CSRF cookie is only sent over HTTPS
+SESSION_COOKIE_SECURE = True # Ensures session cookie is only sent over HTTPS
+
+# Redirect all HTTP traffic to HTTPS
+SECURE_SSL_REDIRECT = True
+
+# HTTP Strict Transport Security (HSTS)
+SECURE_HSTS_SECONDS = 31536000  # 1 year in seconds
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 
 # Application definition
