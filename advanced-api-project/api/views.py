@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from .models import Book
 from rest_framework import generics, permissions,filters
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from django_filters import rest_framework as django_filters
 from .serializers import BookSerializer
 from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
@@ -13,51 +15,37 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 
 # Create your views here.
 
-class BookListCreateView(mixins.ListModelMixin,
-                         mixins.CreateModelMixin,
-                         generics.GenericAPIView):
-    """
-    Handles GET and POST requests for the Book model.
-    - GET: Retrieves a list of all books.
-    - POST: Creates a new book.
-    """
+class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    # Allow read-only access to anyone, but require authentication to create a book.
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+    filter_backends = [
+        django_filters.DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    filterset_fields = ['title', 'author__name', 'publication_year']
+    search_fields = ['title', 'author__name']
+    ordering_fields = ['title', 'publication_year']
+    ordering = ['title']
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-# This view handles retrieving, updating, and deleting a single book.
-# It combines RetrieveModelMixin for GET (detail), UpdateModelMixin for PUT/PATCH,
-# and DestroyModelMixin for DELETE.
-class BookDetailView(mixins.RetrieveModelMixin,
-                     mixins.UpdateModelMixin,
-                     mixins.DestroyModelMixin,
-                     generics.GenericAPIView):
-    """
-    Handles GET, PUT/PATCH, and DELETE requests for a single Book instance.
-    - GET: Retrieves a specific book by ID.
-    - PUT/PATCH: Updates an existing book.
-    - DELETE: Deletes an existing book.
-    """
+class BookDetailView(generics.RetrieveAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    # Require authentication for any of these operations.
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class BookCreateView(generics.CreateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+class BookUpdateView(generics.UpdateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticated]
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)    
+class BookDeleteView(generics.DestroyAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticated]
