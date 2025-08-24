@@ -2,18 +2,25 @@
 
 from django.urls import path
 from . import views
-from .views import UserLoginView, UserLogoutView
+from .views import UserLoginView, UserLogoutView, PostListView, PostDetailView, PostCreateView, PostUpdateView, PostDeleteView
+
 
 urlpatterns = [
-    # URL pattern for the registration page.
-    path('register/', views.register, name='register'),
-
-    # URL pattern for the login page, using the custom class-based view.
-    path('login/', UserLoginView.as_view(), name='login'),
-
-    # URL pattern for the logout page, using the built-in view.
-    path('logout/', UserLogoutView.as_view(), name='logout'),
+     # --- Authentication URLs ---
+    path('register/', views.register, name='register'),  # URL pattern for the registration page.
+    path('login/', UserLoginView.as_view(), name='login'), # URL pattern for the login page, using the custom class-based view.
+    path('logout/', UserLogoutView.as_view(), name='logout'), # URL pattern for the logout page, using the built-in view.
+    path('profile/', views.profile, name='profile'),  # URL pattern for the user profile page.
     
-    # URL pattern for the user profile page.
-    path('profile/', views.profile, name='profile'),
+# --- Post CRUD URLs ---
+    # List all posts
+    path('', PostListView.as_view(), name='blog-home'),
+    # View a single post
+    path('post/<int:pk>/', PostDetailView.as_view(), name='post-detail'),
+    # Create a new post
+    path('post/new/', PostCreateView.as_view(), name='post-create'),
+    # Update an existing post
+    path('post/<int:pk>/update/', PostUpdateView.as_view(), name='post-update'),
+    # Delete a post
+    path('post/<int:pk>/delete/', PostDeleteView.as_view(), name='post-delete'),
 ]

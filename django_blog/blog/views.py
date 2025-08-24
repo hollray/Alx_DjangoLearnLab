@@ -2,9 +2,11 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegisterForm, UserUpdateForm
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from .forms import UserRegisterForm, UserUpdateForm, PostForm
 from django.contrib.auth.views import LoginView, LogoutView
-
+from django.views.generic import (ListView,DetailView,CreateView,UpdateView,DeleteView)
+from .models import Post, User
 # Create your views here.
 
 # The register view handles the user registration process.
@@ -67,3 +69,58 @@ def profile(request):
     }
 
     return render(request, 'blog/profile.html', context)
+
+
+# A class-based view to display a single blog post.
+class PostDetailView(DetailView):
+    """
+    Displays a single blog post.
+    """
+    model = Post
+
+# A class-based view to create a new blog post.
+# LoginRequiredMixin ensures that only logged-in users can access this view.
+class PostCreateView(LoginRequiredMixin, CreateView):
+    """
+    Allows a logged-in user to create a new post.
+    """
+    model = Post
+    form_class = PostForm
+    template_name = 'blog/post_form.html'
+    success_url = '/'  # Redirects to the home page after creation
+
+    # This method automatically sets the author of the post to the current user.
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+# A class-based view to update an existing blog post.
+# LoginRequiredMixin and UserPassesTestMixin are used for access control.
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """
+    Allows a post's author to update their post.
+    """
+    model = Post
+    form_class = PostForm
+    template_name = 'blog/post_form.html'
+    success_url = '/'
+
+    # This method checks if the current user is the author of the post.
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.author
+
+# A class-based view to delete a blog post.
+# Access is restricted to the post's author.
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """
+    Allows a post's author to delete their post.
+    """
+    model = Post
+    template_name = 'blog/post_confirm_delete.html'
+    success_url = '/'
+
+    # This method checks if the current user is the author of the post.
+    def test_func(self):
+        post = self.get_object()
+        return self.request.user == post.author
