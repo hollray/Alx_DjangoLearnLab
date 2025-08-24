@@ -1,15 +1,15 @@
 <!-- blog/templates/blog/home.html -->
-<!-- This is your blog list view, previously base.html might have been used -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog Home</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
     <h1>Blog Posts</h1>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
     {% for post in posts %}
         <article class="media content-section">
             <div class="media-body">
@@ -22,19 +22,12 @@
             </div>
         </article>
     {% endfor %}
-</body>
-</html>
+{% endblock content %}
 ```html
 <!-- blog/templates/blog/post_detail.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ object.title }}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
     <article class="media content-section">
         <div class="media-body">
             <div class="article-metadata">
@@ -51,19 +44,12 @@
             <p class="article-content">{{ object.content }}</p>
         </div>
     </article>
-</body>
-</html>
+{% endblock content %}
 ```html
 <!-- blog/templates/blog/post_form.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Post</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
     <div class="content-section">
         <form method="POST">
             {% csrf_token %}
@@ -76,19 +62,12 @@
             </div>
         </form>
     </div>
-</body>
-</html>
+{% endblock content %}
 ```html
 <!-- blog/templates/blog/post_confirm_delete.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Post</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
     <div class="content-section">
         <form method="POST">
             {% csrf_token %}
@@ -102,5 +81,88 @@
             </div>
         </form>
     </div>
-</body>
-</html>
+{% endblock content %}
+```html
+<!-- blog/templates/blog/login.html -->
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Log In</legend>
+                {{ form.as_p }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Login</button>
+            </div>
+        </form>
+        <div class="border-top pt-3">
+            <small class="text-muted">
+                Need An Account? <a class="ml-2" href="{% url 'register' %}">Sign Up Now</a>
+            </small>
+        </div>
+    </div>
+{% endblock content %}
+```html
+<!-- blog/templates/blog/register.html -->
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Join Today</legend>
+                {{ form.as_p }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Sign Up</button>
+            </div>
+        </form>
+        <div class="border-top pt-3">
+            <small class="text-muted">
+                Already Have An Account? <a class="ml-2" href="{% url 'login' %}">Sign In</a>
+            </small>
+        </div>
+    </div>
+{% endblock content %}
+```html
+<!-- blog/templates/blog/profile.html -->
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="content-section">
+        <div class="media">
+            <div class="media-body">
+                <h2 class="account-heading">{{ user.username }}</h2>
+                <p class="text-secondary">{{ user.email }}</p>
+            </div>
+        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Profile Info</legend>
+                {{ u_form.as_p }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Update</button>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+```html
+<!-- blog/templates/blog/logout.html -->
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="content-section">
+        <h2>You have been logged out</h2>
+        <div class="border-top pt-3">
+            <small class="text-muted">
+                <a href="{% url 'login' %}">Log In Again</a>
+            </small>
+        </div>
+    </div>
+{% endblock content %}
