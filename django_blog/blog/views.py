@@ -73,6 +73,38 @@ def profile(request):
 
     return render(request, 'blog/profile.html', context)
 
+# A class-based view to display a list of all blog posts.
+class PostListView(ListView):
+    """
+    Displays a list of all blog posts.
+    """
+    model = Post
+    template_name = 'blog/home.html'
+    context_object_name = 'posts'
+    ordering = ['-published_date']
+    paginate_by = 10
+
+# A class-based view to display posts filtered by a specific tag.
+class PostsByTagListView(ListView):
+    """
+    Displays a list of posts filtered by a specific tag.
+    """
+    model = Post
+    template_name = 'blog/posts_by_tag.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        # Get the tag from the URL and filter posts by it.
+        tag = get_object_or_404(Tag, slug=self.kwargs.get('tag_slug'))
+        return Post.objects.filter(tags__in=[tag]).order_by('-published_date')
+
+    def get_context_data(self, **kwargs):
+        # Add the tag name to the context for use in the template.
+        context = super().get_context_data(**kwargs)
+        context['tag_name'] = self.kwargs.get('tag_slug')
+        return context
+
 
 # A class-based view to display a single blog post.
 class PostDetailView(DetailView):
@@ -135,56 +167,62 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
-
-# Function-based views for comments.
-@login_required
-def add_comment_to_post(request, pk):
+    
+# Class-based views for comments.
+class CommentCreateView(LoginRequiredMixin, CreateView):
     """
-    Adds a new comment to a post.
+    Allows a logged-in user to create a new comment.
     """
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == "POST":
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = post
-            comment.author = request.user
-            comment.save()
-            messages.success(request, 'Your comment has been added!')
-            return redirect('post-detail', pk=post.pk)
-    else:
-        # If not a POST request, just redirect to the post detail page.
-        return redirect('post-detail', pk=post.pk)
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/post_detail.html'
 
-@login_required
-def comment_update(request, pk):
+    def form_valid(self, form):
+        # Set the author and post for the comment.
+        form.instance.author = self.request.user
+        form.instance.post_id = self.kwargs['pk']
+        messages.success(self.request, 'Your comment has been added!')
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        # Redirect to the post detail page after a successful comment.
+        return self.object.post.get_absolute_url()
+
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
     Allows a comment's author to update their comment.
     """
-    comment = get_object_or_404(Comment, pk=pk, author=request.user)
-    if request.method == "POST":
-        form = CommentForm(request.POST, instance=comment)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Your comment has been updated!')
-            return redirect('post-detail', pk=comment.post.pk)
-    else:
-        form = CommentForm(instance=comment)
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment_form.html'
     
-    return render(request, 'blog/comment_form.html', {'form': form})
+    def test_func(self):
+        # Ensure only the comment's author can edit the comment.
+        comment = self.get_object()
+        return self.request.user == comment.author
 
-@login_required
-def comment_delete(request, pk):
+    def get_success_url(self):
+        messages.success(self.request, 'Your comment has been updated!')
+        # Redirect to the post detail page after a successful update.
+        return self.object.post.get_absolute_url()
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """
     Allows a comment's author to delete their comment.
     """
-    comment = get_object_or_404(Comment, pk=pk, author=request.user)
-    if request.method == "POST":
-        comment.delete()
-        messages.success(request, 'Your comment has been deleted!')
-        return redirect('post-detail', pk=comment.post.pk)
-    
-    return render(request, 'blog/comment_confirm_delete.html', {'comment': comment})
+    model = Comment
+    template_name = 'blog/comment_confirm_delete.html'
+
+    def test_func(self):
+        # Ensures only the comment's author can delete the comment.
+        comment = self.get_object()
+        return self.request.user == comment.author
+
+    def get_success_url(self):
+        messages.success(self.request, 'Your comment has been deleted!')
+        # Redirect to the post detail page after a successful deletion.
+        return self.object.post.get_absolute_url()
 
 def search(request):
     """
