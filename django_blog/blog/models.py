@@ -27,3 +27,29 @@ class Post(models.Model):
         # This string method returns the title of the post, which is helpful
         # for displaying posts in the Django admin interface.
         return self.title
+    
+
+# A model for a comment on a blog post.
+class Comment(models.Model):
+    """
+    Represents a comment on a blog post.
+    """
+    # Foreign key to the Post model, establishing a many-to-one relationship.
+    # Each comment belongs to a single post.
+    post = models.ForeignKey(Post, related_name='comments', on_delete=models.CASCADE)
+
+    # Foreign key to the User model, for tracking the comment's author.
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    # The content of the comment.
+    content = models.TextField()
+
+    # The date and time the comment was created.
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # The date and time the comment was last updated.
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        # Returns a string representation of the comment.
+        return f'Comment by {self.author} on {self.post.title}'

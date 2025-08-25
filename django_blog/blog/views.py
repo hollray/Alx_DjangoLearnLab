@@ -1,12 +1,12 @@
 from django.shortcuts import render
-from django.shortcuts import redirect
+from django.shortcuts import redirect,get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from .forms import UserRegisterForm, UserUpdateForm, PostForm
+from .forms import UserRegisterForm, UserUpdateForm, PostForm,CommentForm
 from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic import (ListView,DetailView,CreateView,UpdateView,DeleteView)
-from .models import Post, User
+from .models import Post, User,Comment
 # Create your views here.
 
 # The register view handles the user registration process.
@@ -124,3 +124,53 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
+# Function-based views for comments.
+@login_required
+def add_comment_to_post(request, pk):
+    """
+    Adds a new comment to a post.
+    """
+    post = get_object_or_404(Post, pk=pk)
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.author = request.user
+            comment.save()
+            messages.success(request, 'Your comment has been added!')
+            return redirect('post-detail', pk=post.pk)
+    else:
+        # If not a POST request, just redirect to the post detail page.
+        return redirect('post-detail', pk=post.pk)
+
+@login_required
+def comment_update(request, pk):
+    """
+    Allows a comment's author to update their comment.
+    """
+    comment = get_object_or_404(Comment, pk=pk, author=request.user)
+    if request.method == "POST":
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your comment has been updated!')
+            return redirect('post-detail', pk=comment.post.pk)
+    else:
+        form = CommentForm(instance=comment)
+    
+    return render(request, 'blog/comment_form.html', {'form': form})
+
+@login_required
+def comment_delete(request, pk):
+    """
+    Allows a comment's author to delete their comment.
+    """
+    comment = get_object_or_404(Comment, pk=pk, author=request.user)
+    if request.method == "POST":
+        comment.delete()
+        messages.success(request, 'Your comment has been deleted!')
+        return redirect('post-detail', pk=comment.post.pk)
+    
+    return render(request, 'blog/comment_confirm_delete.html', {'comment': comment})
