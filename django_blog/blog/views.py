@@ -7,6 +7,9 @@ from .forms import UserRegisterForm, UserUpdateForm, PostForm,CommentForm
 from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic import (ListView,DetailView,CreateView,UpdateView,DeleteView)
 from .models import Post, User,Comment
+
+from django.db.models import Q
+from taggit.models import Tag
 # Create your views here.
 
 # The register view handles the user registration process.
@@ -77,6 +80,14 @@ class PostDetailView(DetailView):
     Displays a single blog post.
     """
     model = Post
+
+    def get_context_data(self, **kwargs):
+        # This method adds the comment form and comments to the context
+        # so they can be displayed in the template.
+        context = super().get_context_data(**kwargs)
+        context['comment_form'] = CommentForm()
+        context['comments'] = self.object.comments.order_by('-created_at')
+        return context
 
 # A class-based view to create a new blog post.
 # LoginRequiredMixin ensures that only logged-in users can access this view.
@@ -174,3 +185,23 @@ def comment_delete(request, pk):
         return redirect('post-detail', pk=comment.post.pk)
     
     return render(request, 'blog/comment_confirm_delete.html', {'comment': comment})
+
+def search(request):
+    """
+    Handles search queries to find posts by title, content, or tags.
+    """
+    query = request.GET.get('q', '')
+    posts = Post.objects.all().order_by('-published_date')
+    if query:
+        # Use Q objects to perform a complex search across multiple fields.
+        posts = posts.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct()
+
+    context = {
+        'posts': posts,
+        'query': query,
+    }
+    return render(request, 'blog/search_results.html', context)

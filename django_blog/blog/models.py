@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from taggit.managers import TaggableManager
 
 # Create your models here.
 
@@ -21,6 +22,10 @@ class Post(models.Model):
     # This establishes a one-to-many relationship, allowing one user to have many posts.
     # models.CASCADE ensures that if a User is deleted, all their associated posts are also deleted.
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    # A manager to handle the tags for the post.
+    # It allows for a many-to-many relationship with tags.
+    tags = TaggableManager()
 
 
     def __str__(self):

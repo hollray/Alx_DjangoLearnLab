@@ -1,15 +1,21 @@
 <!-- blog/templates/blog/home.html -->
-<!-- This is your blog list view, previously base.html might have been used -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog Home</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="search-form">
+        <form action="{% url 'search' %}" method="get">
+            <input type="text" name="q" placeholder="Search posts..." class="form-control">
+            <button type="submit" class="btn btn-outline-info">Search</button>
+        </form>
+    </div>
     <h1>Blog Posts</h1>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
     {% for post in posts %}
         <article class="media content-section">
             <div class="media-body">
@@ -19,22 +25,18 @@
                 </div>
                 <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
                 <p class="article-content">{{ post.content|truncatewords:30 }}</p>
+                {% for tag in post.tags.all %}
+                    <a class="badge badge-info" href="{% url 'posts-by-tag' tag.slug %}">{{ tag.name }}</a>
+                {% endfor %}
             </div>
         </article>
     {% endfor %}
-</body>
-</html>
+{% endblock content %}
 ```html
 <!-- blog/templates/blog/post_detail.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ object.title }}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
     <article class="media content-section">
         <div class="media-body">
             <div class="article-metadata">
@@ -49,21 +51,52 @@
             </div>
             <h2 class="article-title">{{ object.title }}</h2>
             <p class="article-content">{{ object.content }}</p>
+            {% for tag in object.tags.all %}
+                <a class="badge badge-info" href="{% url 'posts-by-tag' tag.slug %}">{{ tag.name }}</a>
+            {% endfor %}
         </div>
     </article>
-</body>
-</html>
+    <div class="content-section">
+        <h3>Comments ({{ comments.count }})</h3>
+        {% if user.is_authenticated %}
+            <form action="{% url 'add-comment' object.id %}" method="POST">
+                {% csrf_token %}
+                <fieldset class="form-group">
+                    <legend class="border-bottom mb-4">Add a Comment</legend>
+                    {{ comment_form.as_p }}
+                </fieldset>
+                <div class="form-group">
+                    <button class="btn btn-outline-info" type="submit">Submit Comment</button>
+                </div>
+            </form>
+        {% else %}
+            <p>You must be logged in to comment.</p>
+        {% endif %}
+
+        {% for comment in comments %}
+            <article class="media content-section">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        <a class="mr-2" href="#">{{ comment.author }}</a>
+                        <small class="text-muted">{{ comment.created_at|date:"F d, Y, P" }}</small>
+                        {% if comment.author == user %}
+                            <div>
+                                <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'comment-update' comment.id %}">Edit</a>
+                                <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'comment-delete' comment.id %}">Delete</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <p class="article-content">{{ comment.content }}</p>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% endblock content %}
 ```html
 <!-- blog/templates/blog/post_form.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Post</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
     <div class="content-section">
         <form method="POST">
             {% csrf_token %}
@@ -76,19 +109,12 @@
             </div>
         </form>
     </div>
-</body>
-</html>
+{% endblock content %}
 ```html
 <!-- blog/templates/blog/post_confirm_delete.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Post</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
     <div class="content-section">
         <form method="POST">
             {% csrf_token %}
@@ -102,5 +128,188 @@
             </div>
         </form>
     </div>
-</body>
-</html>
+{% endblock content %}
+```html
+<!-- blog/templates/blog/login.html -->
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Log In</legend>
+                {{ form.as_p }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Login</button>
+            </div>
+        </form>
+        <div class="border-top pt-3">
+            <small class="text-muted">
+                Need An Account? <a class="ml-2" href="{% url 'register' %}">Sign Up Now</a>
+            </small>
+        </div>
+    </div>
+{% endblock content %}
+```html
+<!-- blog/templates/blog/register.html -->
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Join Today</legend>
+                {{ form.as_p }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Sign Up</button>
+            </div>
+        </form>
+        <div class="border-top pt-3">
+            <small class="text-muted">
+                Already Have An Account? <a class="ml-2" href="{% url 'login' %}">Sign In</a>
+            </small>
+        </div>
+    </div>
+{% endblock content %}
+```html
+<!-- blog/templates/blog/profile.html -->
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="content-section">
+        <div class="media">
+            <div class="media-body">
+                <h2 class="account-heading">{{ user.username }}</h2>
+                <p class="text-secondary">{{ user.email }}</p>
+            </div>
+        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Profile Info</legend>
+                {{ u_form.as_p }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Update</button>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+```html
+<!-- blog/templates/blog/logout.html -->
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="content-section">
+        <h2>You have been logged out</h2>
+        <div class="border-top pt-3">
+            <small class="text-muted">
+                <a href="{% url 'login' %}">Log In Again</a>
+            </small>
+        </div>
+    </div>
+{% endblock content %}
+```html
+<!-- blog/templates/blog/comment_form.html -->
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Update Comment</legend>
+                {{ form.as_p }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Update Comment</button>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+```html
+<!-- blog/templates/blog/comment_confirm_delete.html -->
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Delete Comment</legend>
+                <h2 class="article-title">Are you sure you want to delete this comment?</h2>
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-danger" type="submit">Yes, Delete</button>
+                <a class="btn btn-secondary" href="{% url 'post-detail' comment.post.id %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+```html
+<!-- blog/templates/blog/posts_by_tag.html -->
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="search-form">
+        <form action="{% url 'search' %}" method="get">
+            <input type="text" name="q" placeholder="Search posts..." class="form-control">
+            <button type="submit" class="btn btn-outline-info">Search</button>
+        </form>
+    </div>
+    <h1>Posts Tagged with "{{ tag_name }}"</h1>
+    {% for post in posts %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <a class="mr-2" href="#">{{ post.author }}</a>
+                    <small class="text-muted">{{ post.published_date|date:"F d, Y" }}</small>
+                </div>
+                <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
+                <p class="article-content">{{ post.content|truncatewords:30 }}</p>
+                {% for tag in post.tags.all %}
+                    <a class="badge badge-info" href="{% url 'posts-by-tag' tag.slug %}">{{ tag.name }}</a>
+                {% endfor %}
+            </div>
+        </article>
+    {% endfor %}
+{% endblock content %}
+```html
+<!-- blog/templates/blog/search_results.html -->
+{% extends "blog/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="search-form">
+        <form action="{% url 'search' %}" method="get">
+            <input type="text" name="q" placeholder="Search posts..." class="form-control">
+            <button type="submit" class="btn btn-outline-info">Search</button>
+        </form>
+    </div>
+    <h1>Search Results</h1>
+    {% if query %}
+        <p class="text-muted">Showing results for "{{ query }}"</p>
+    {% endif %}
+    {% if posts %}
+        {% for post in posts %}
+            <article class="media content-section">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        <a class="mr-2" href="#">{{ post.author }}</a>
+                        <small class="text-muted">{{ post.published_date|date:"F d, Y" }}</small>
+                    </div>
+                    <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
+                    <p class="article-content">{{ post.content|truncatewords:30 }}</p>
+                    {% for tag in post.tags.all %}
+                        <a class="badge badge-info" href="{% url 'posts-by-tag' tag.slug %}">{{ tag.name }}</a>
+                    {% endfor %}
+                </div>
+            </article>
+        {% endfor %}
+    {% else %}
+        <p>No posts found matching your search criteria.</p>
+    {% endif %}
+{% endblock content %}

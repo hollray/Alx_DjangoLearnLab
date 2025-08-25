@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
 from .models import Post,Comment
+from taggit.forms import TagWidget
 
 # This form extends Django's built-in UserCreationForm to include the email field.
 # This makes it easy to handle both username and email during registration.
@@ -45,7 +46,12 @@ class PostForm(forms.ModelForm):
         model = Post
         # We include the title and content fields for the user to fill out.
         # The author will be automatically set in the view.
-        fields = ['title', 'content']
+        fields = ['title', 'content','tags']
+        # tag included
+        widgets = {
+            'tags': TagWidget(),
+        }
+
 
 # A form to create and update comment.
 class CommentForm(forms.ModelForm):
