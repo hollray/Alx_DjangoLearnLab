@@ -2,7 +2,7 @@
 
 from django.urls import path
 from . import views
-from .views import UserLoginView, UserLogoutView, PostListView, PostDetailView, PostCreateView, PostUpdateView, PostDeleteView,PostsByTagListView
+from .views import UserLoginView, UserLogoutView, PostListView, PostDetailView, PostCreateView, PostUpdateView, PostDeleteView,PostsByTagListView,CommentCreateView,CommentDeleteView,CommentUpdateView
 
 
 urlpatterns = [
@@ -13,25 +13,22 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),  # URL pattern for the user profile page.
     
 # --- Post CRUD URLs ---
-    # List all posts
     path('', PostListView.as_view(), name='blog-home'),
-    # View a single post
     path('post/<int:pk>/', PostDetailView.as_view(), name='post-detail'),
-    # Create a new post
     path('post/new/', PostCreateView.as_view(), name='post-create'),
-    # Update an existing post
     path('post/<int:pk>/update/', PostUpdateView.as_view(), name='post-update'),
-    # Delete a post
     path('post/<int:pk>/delete/', PostDeleteView.as_view(), name='post-delete'),
-
-# --- Comment URLs ---
-    path('post/<int:pk>/comment/add/', views.add_comment_to_post, name='add-comment'),
-    path('comment/<int:pk>/update/', views.comment_update, name='comment-update'),
-    path('comment/<int:pk>/delete/', views.comment_delete, name='comment-delete'),
-
+    
+    # --- Comment URLs ---
+    path('posts/<int:pk>/comments/new/', CommentCreateView.as_view(), name='add-comment'),
+    path('comment/<int:pk>/update/', CommentUpdateView.as_view(), name='comment-update'),
+    path('comment/<int:pk>/delete/', CommentDeleteView.as_view(), name='comment-delete'),
+    
     # --- Tagging and Search URLs ---
     # View posts filtered by a specific tag
     path('tags/<slug:tag_slug>/', PostsByTagListView.as_view(), name='posts-by-tag'),
     # Search functionality
     path('search/', views.search, name='search'),
 ]
+
+
