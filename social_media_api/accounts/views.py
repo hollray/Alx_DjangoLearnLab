@@ -59,7 +59,7 @@ class FollowUserView(generics.GenericAPIVieww):
         return Response({'message': f'You are now following {user_to_follow.username}.'}, status=status.HTTP_200_OK)
 
 class UnfollowUserView(APIView):
-    queryset = CustomizedUser.objects.all
+    queryset = CustomizedUser.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, user_id):
