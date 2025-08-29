@@ -56,7 +56,7 @@ class FeedView(ListAPIView):
 
     def get_queryset(self):
         # Get the users that the current user is following
-        followed_users = self.request.user.following.all()
+        following_users = self.request.user.following.all()
         # Return posts from those users, ordered by creation date
-        queryset = Post.objects.filter(author__in=followed_users).order_by('-created_at')
+        queryset = Post.objects.filter(author__in=following_users).order_by('-created_at')
         return queryset
