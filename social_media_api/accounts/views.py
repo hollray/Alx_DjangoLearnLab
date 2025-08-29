@@ -16,6 +16,9 @@ from .serializers import UserRegistrationSerializer, UserSerializer, LoginSerial
 
 User = get_user_model()
 
+_ = CustomizedUser.objects.all() 
+
+
 class RegisterView(generics.CreateAPIView):
     """
     API view for user registration.
