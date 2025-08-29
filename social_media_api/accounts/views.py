@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from .models import CustomizedUser
+from .models import CustomUser
 from .serializers import UserRegistrationSerializer, UserSerializer, LoginSerializer
 
 # Note: serializers are imported here
@@ -16,7 +16,7 @@ from .serializers import UserRegistrationSerializer, UserSerializer, LoginSerial
 
 User = get_user_model()
 
-_ = CustomizedUser.objects.all() 
+_ = CustomUser.objects.all() 
 
 
 class RegisterView(generics.CreateAPIView):
@@ -45,8 +45,8 @@ class LoginView(ObtainAuthToken):
         return Response({'token': token.key, 'user': user})
     
 
-class FollowUserView(generics.GenericAPIVieww):
-    queryset =CustomizedUser.objects.all
+class FollowUserView(generics.GenericAPIView):
+    queryset =CustomUser.objects.all
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, user_id):
@@ -61,8 +61,8 @@ class FollowUserView(generics.GenericAPIVieww):
         request.user.following.add(user_to_follow)
         return Response({'message': f'You are now following {user_to_follow.username}.'}, status=status.HTTP_200_OK)
 
-class UnfollowUserView(APIView):
-    queryset = CustomizedUser.objects.all()
+class UnfollowUserView(generics.GenericAPIView):
+    queryset = CustomUser.objects.all()
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, user_id):
