@@ -2,6 +2,9 @@ from django.db import models
 
 # Create your models here.
 class Department(models.Model):
+    """
+    Represents a department within the company.
+    """
     name = models.CharField(max_length=100)
     description = models.TextField()
     created_at = models.DateField
@@ -12,6 +15,9 @@ class Department(models.Model):
 
 
 class Employee(models.Model):
+    """
+    Represents an employee, linked to a department.
+    """
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     employee_id = models.IntegerField(unique=True)
