@@ -1,15 +1,28 @@
 from django.contrib import admin
-from .models import Department,Employee
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .models import Department, Employee, Role, CustomUser
 
-# Register your models here.
+# Register your non-user models
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ('name',)
 
-class EmplyeeAdmin(admin.ModelAdmin):
-    """
-    This displays the functionality of the admin page
-    """
-    # list_display: Controls which fields are displayed on the change list page of the admin.
-    list_display = ('first_name','last_name','employee_id','department')
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
 
-    # list_filter: Enables filtering options on the right sidebar of the change list page.
-    # Users can filter by these fields.
+@admin.register(Employee)
+class EmployeeAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'employee_id', 'department')
     list_filter = ('department', 'employee_id')
+
+# Register the CustomUser model with a custom admin view.
+# This replaces all previous attempts to register the default User model.
+@admin.register(CustomUser)
+class CustomUserAdmin(BaseUserAdmin):
+    # Add the 'role' field to the list of fields shown in the admin.
+    fieldsets = BaseUserAdmin.fieldsets + (
+        (None, {'fields': ('role',)}),
+    )
+    # Add the 'role' field to the list display in the admin.
+    list_display = BaseUserAdmin.list_display + ('role',)
