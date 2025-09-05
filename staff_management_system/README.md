@@ -109,4 +109,130 @@ I have separate endpoints for both models to handle CRUD (Create, Read, Update, 
 ○	DELETE /api/employees/<int:pk>/: Delete an employee.
 
 
+Json Samples:
 
+Department Endpoint:
+
+1. *GET* 
+url: http://127.0.0.1:8080/api/departments/:
+●	GET /api/departments/
+○	Description: Retrieves a list of all departments.
+○	Data Handled: No request body. Returns an array of department objects in the response
+
+example:
+[
+    {
+        "id": 1,
+        "name": "Information Technology",
+        "description": "IT is responsible for all administrative task",
+        "created_at": "2025-09-03"
+    },
+    {
+        "id": 2,
+        "name": "Human Resources",
+        "description": "HR is responsible for staff management",
+        "created_at": "2025-09-03"
+    },
+    {
+        "id": 3,
+        "name": "Finance and Admin",
+        "description": "Responsible for Finances and Administration",
+        "created_at": "2025-09-04"
+    }
+]
+
+2. *GET* 
+url: http://127.0.0.1:8080/api/departments/1:
+(gets an individual detail of a department with ID number 1.)
+●	GET /api/departments/<int:pk>/
+○	Description: Retrieves a single department by its primary key (ID).
+○	Data Handled: No request body. Returns a single department object if found.
+
+example:
+[
+    {
+        "id": 1,
+        "name": "Information Technology",
+        "description": "IT is responsible for all administrative task",
+        "created_at": "2025-09-03"
+    },
+  
+]
+
+3. 	*POST* 
+url: http://127.0.0.1:800/api/departments/
+●	POST /api/departments/
+○	Description: Creates a new department.
+○	Data Handled: Requires a JSON object in the request body with ‘name’ and ‘description’ fields. Returns the newly created department object.
+
+example:
+
+{
+    "name": "Finance and Admin",
+    "description": "Responsible for Finances and Administration"
+}
+
+4. *PUT*
+url: http://127.0.0.1:8080/api/departments/1/
+●	PUT /api/departments/<int:pk>/
+○	Description: Updates an existing department.
+○	Data Handled: Requires a JSON object in the request body with the fields to be updated. Returns the updated department object.
+examples:
+
+{
+        "id": 1,
+        "name": "Information Technology",
+        "description": "IT department is responsible for all administrative task",
+        "created_at": "2025-09-03"
+    }
+
+
+Employee Endpoint:
+
+1. *Post* 
+url: http://127.0.0.1:8000/api/employees/
+●	POST /api/employees/
+○	Description: Creates a new employee. i'll need to link them to an existing department.
+○	Data Handled: Requires a JSON object with employee details and the department_id to which they should be assigned. Returns the new employee object.
+
+example:
+{
+        "department_name": "Finance and Admin",
+        "first_name": "Habeeb",
+        "last_name": "Alarape",
+        "employee_id": "02",
+        "email": "h.alarape@oibl-nigeria.com",
+        "phone_number": "08012345678",
+        "designation": "Head Finance and Admin",
+        "hire_date": "2017-09-01",
+        "is_active": true,
+        "department": 3
+    }
+
+2. "GET*
+url: http://127.0.0.1:8080/api/employees/
+●	GET /api/employees/
+○	Description: Retrieves a list of all employees.
+○	Data Handled: No request body. Returns an array of employee objects, including their associated department.
+
+Example: (does not need any request body)
+
+
+3. *POST*
+Url: http://127.0.0.1:8080/api/employees/
+●	POST /api/employees/
+○	Description: Creates a new employee. i'll need to link them to an existing department.
+○	Data Handled: Requires a JSON object with employee details and the department_id to which they should be assigned. Returns the new employee object.
+
+examples:
+
+{
+    "first_name": "Micheal",
+    "last_name": "This field is required.",
+    "employee_id": "This field is required.",
+    "email": "This field is required.",
+    "phone_number": "This field is required.",
+    "designation": "This field is required.",
+    "hire_date": "This field is required.",
+    "department": "This field is required."
+}
