@@ -1,0 +1,9 @@
+# Django-specific ignores
+__pycache__/
+*.pyc
+*.sqlite3
+.env
+
+# Virtual environment
+venv/
+staff_management_system_new/
