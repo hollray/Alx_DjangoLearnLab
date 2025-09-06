@@ -7,7 +7,6 @@ from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import DetailView
 from .models import Book, Library, UserProfile # Ensure all models are imported
 from .forms import BookForm # This is required for the book management views
-from django.http import Http404, HttpResponseForbidden
 
 # Create your views here.
 def list_books(request):
@@ -88,44 +87,33 @@ def logout_view(request):
 
 
 # Helper functions to check user roles
+# Helper functions to check user roles
 def is_admin(user):
-    """ This function checks if the user has an 'Admin' Role """
-    return hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
+    """ This function checks if the user is authenticated and has an 'Admin' role """
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
 
 def is_librarian(user):
-    """ This function checks if the user has a 'Librarian' Role """
-    return hasattr(user, 'userprofile') and user.userprofile.role == 'Librarian'
+    """ This function checks if the user is authenticated and has a 'Librarian' role """
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Librarian'
 
 def is_member(user):
-    """ This function checks if the user has a 'Member' Role """
-    return hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
+    """ This function checks if the user is authenticated and has a 'Member' role """
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
 
 
 # Views with role-based access control
 @login_required
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url='/login/')
 def admin_view(request):
     """
     View accessible only to users with the 'Admin' role.
-    If a non-admin user (authenticated) tries to access, they are redirected
-    to their respective dashboard (Librarian or Member) or receive a 403 Forbidden.
+    The decorators handle access control and redirection.
     """
-    # Check if the user is an Admin
-    if is_admin(request.user):
-        return render(request, 'admin_view.html', {'message': 'Welcome, Admin!'})
-    elif is_librarian(request.user):
-        # If not Admin, but is Librarian, redirect to Librarian dashboard
-        return redirect('librarian_view')
-    elif is_member(request.user):
-        # If not Admin or Librarian, but is Member, redirect to Member dashboard
-        return redirect('member_view')
-    else:
-        # If authenticated but none of the defined roles, deny access
-        return HttpResponseForbidden("You do not have permission to access this page.")
+    return render(request, 'relationship_app/admin_view.html', {'message': 'Welcome, Admin!'})
 
 
 @login_required
-@user_passes_test(is_librarian)
+@user_passes_test(is_librarian, login_url='/login/')
 def librarian_view(request):
     """
     View accessible only to users with the 'Librarian' role.
@@ -134,7 +122,7 @@ def librarian_view(request):
     return render(request, 'librarian_view.html', {'message': 'Welcome, Librarian!'})
 
 @login_required
-@user_passes_test(is_member)
+@user_passes_test(is_member, login_url='/login/')
 def member_view(request):
     """
     View accessible only to users with the 'Member' role.
@@ -150,7 +138,7 @@ def add_book(request):
     """
     View to add a new book. Requires 'can_add_book' permission.
     """
-    from .forms import BookForm # Import here to avoid circular imports and AppRegistryNotReady issues
+    
     if request.method == 'POST':
         form = BookForm(request.POST)
         if form.is_valid():
@@ -165,7 +153,7 @@ def edit_book(request, pk):
     """
     View to edit an existing book. Requires 'can_change_book' permission.
     """
-    from .forms import BookForm # Import here to avoid circular imports and AppRegistryNotReady issues
+    
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
         form = BookForm(request.POST, instance=book)

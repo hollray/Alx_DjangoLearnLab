@@ -2,7 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-# from django.dispatch import receiver
+from django.dispatch import receiver
 
 # Create your models here.
 class Author(models.Model):
@@ -84,7 +84,7 @@ class UserProfile(models.Model):
         return f'{self.user.username} - {self.role}'
 
 # Signal to automatically create a UserProfile when a new User is created
-# @receiver(post_save, sender=User)
+@receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
     """
     This signal receiver automatically creates a UserProfile for a new User.
@@ -98,4 +98,3 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
         # This handles cases where a user might be updated but their profile isn't.
         if hasattr(instance, 'userprofile'):
             instance.userprofile.save()
-
