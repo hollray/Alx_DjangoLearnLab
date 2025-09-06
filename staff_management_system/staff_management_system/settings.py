@@ -83,6 +83,7 @@ WSGI_APPLICATION = 'staff_management_system.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # This handles Heroku's database URL and our local settings
+# Heroku database configuration first and if it fails it uses local database
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
     DATABASES = {
