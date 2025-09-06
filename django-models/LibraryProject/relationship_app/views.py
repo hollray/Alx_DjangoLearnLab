@@ -109,8 +109,8 @@ def admin_view(request):
     View accessible only to users with the 'Admin' role.
     The decorators handle access control and redirection.
     """
-    return render(request, 'relationship_app/admin_view.html', {'message': 'Welcome, Admin!'})
-
+    #return render(request, 'relationship_app/admin_view.html', {'message': 'Welcome, Admin!'})
+    return render(request, 'librarian_view.html', {'message': 'Welcome, Librarian!'})
 
 @login_required
 @user_passes_test(is_librarian, login_url='/login/')
@@ -119,7 +119,7 @@ def librarian_view(request):
     View accessible only to users with the 'Librarian' role.
     Renders 'librarian_view.html'.
     """
-    return render(request, 'librarian_view.html', {'message': 'Welcome, Librarian!'})
+    return render(request, 'relationship_app/librarian_view.html', {'message': 'Welcome, Librarian!'})
 
 @login_required
 @user_passes_test(is_member, login_url='/login/')
@@ -128,7 +128,9 @@ def member_view(request):
     View accessible only to users with the 'Member' role.
     Renders 'member_view.html'.
     """
-    return render(request, 'member_view.html', {'message': 'Welcome, Member!'})
+    return render(request, 'relationship_app/member_view.html', {'message': 'Welcome, Member!'})
+
+
 
 
 # --- New Views for Book Permissions ---
