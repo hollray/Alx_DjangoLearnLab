@@ -1,0 +1,20 @@
+# Virtual environment
+venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+
+# Database
+db.sqlite3
+
+# Environment variables
+.env
+
+# Django-specific temporary files
+media/
+staticfiles/
+
+# Heroku-specific files
+.python-version
+runtime.txt
